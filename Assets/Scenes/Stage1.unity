@@ -585,11 +585,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 011885f09c82fd745968e242a9ef05cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapPieceA: {fileID: 8860640290636909558, guid: f2dadc4e47c20f24b980dca01ff75ed9, type: 3}
-  mapPieceB: {fileID: 7835690884934250165, guid: 622c75092024aee42972a74178ceb30c, type: 3}
-  mapPieceC: {fileID: 1694523552583488953, guid: 599a6c634210cc945a9d71d9504f5363, type: 3}
-  mapPieceD: {fileID: 2896768240820039351, guid: d821a72594aeaf94db74e01592b4bf63, type: 3}
-  mapPieceE: {fileID: 2698327921685840589, guid: 776d69d8f63ac8c4cb0f89ca6efa0e69, type: 3}
+  mapPieceA: {fileID: 8860640290636909558, guid: 835886c28957e3146811c0839fa0aacd, type: 3}
+  mapPieceB: {fileID: 7835690884934250165, guid: 33e0106c1338e2e4486396b62b6fdbd2, type: 3}
+  mapPieceC: {fileID: 1694523552583488953, guid: 0a415b47677f3294c9eab56717a4e872, type: 3}
+  mapPieceD: {fileID: 2896768240820039351, guid: 92d2cab7dc8b92a4483c820a972f036c, type: 3}
+  mapPieceE: {fileID: 2698327921685840589, guid: 99ae60bdfbfb0c54bbfcb7f275f41449, type: 3}
   piecesToSpawn: 3
   spawnY: 3
   fallbackSpacing: 5
