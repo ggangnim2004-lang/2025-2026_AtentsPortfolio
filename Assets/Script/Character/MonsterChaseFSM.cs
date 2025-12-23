@@ -23,11 +23,17 @@ public class MonsterChaseFSM : MonoBehaviour
     public float moveSpeed = 3.0f;
     public float turnSpeed = 10f;
 
+    [Header("Chase Radius")]
+    public float startChaseRadius = 3f;
+    public float stopChaseRadius = 5f;
+
     [Header("Debug")]
     public bool drawGizmos = true;
 
     private Rigidbody rb;
     private State state = State.Idle;
+
+
 
     private void Awake()
     {
@@ -50,9 +56,18 @@ public class MonsterChaseFSM : MonoBehaviour
 
         float dist = Vector3.Distance(GetFlatPos(transform.position), GetFlatPos(player.position));
 
-        // 상태 전환
-        if (dist <= detectRadius) state = State.Chase;
-        else state = State.Idle;
+        switch (state)
+        {
+            case State.Idle:
+                if (dist <= startChaseRadius)
+                    state = State.Chase;
+                break;
+
+            case State.Chase:
+                if (dist >= stopChaseRadius)
+                    state = State.Idle; // 다음 단계에서 Return으로 바꿀 자리
+                break;
+        }
     }
 
     private void FixedUpdate()
@@ -118,13 +133,13 @@ public class MonsterChaseFSM : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (!drawGizmos) return;
-
+        // 추적 시작 반경 (노랑)
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectRadius);
+        Gizmos.DrawWireSphere(transform.position, startChaseRadius);
 
+        // 추적 종료 반경
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, stopDistance);
+        Gizmos.DrawWireSphere(transform.position, stopChaseRadius);
     }
 
 }

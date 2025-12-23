@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour
 
     public Transform mapDirectionAnchor;
 
+    public MonsterSpawner monsterSpawner;
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -41,6 +43,8 @@ public class GameManager : MonoBehaviour
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
+
+        monsterSpawner.SpawnOnce();
     }
 
 
