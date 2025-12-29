@@ -133,8 +133,8 @@ MonoBehaviour:
   detectRadius: 6
   moveSpeed: 1
   turnSpeed: 15
-  startChaseRadius: 3
-  stopChaseRadius: 2.8
+  startChaseRadius: 4.5
+  stopChaseRadius: 4.2
   drawGizmos: 1
 --- !u!114 &9186244521137893395
 MonoBehaviour:

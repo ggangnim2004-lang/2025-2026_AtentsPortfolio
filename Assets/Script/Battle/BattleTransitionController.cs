@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public class BattleTransitionController : MonoBehaviour
 {
     public static BattleTransitionController Instance { get; private set; }
@@ -36,6 +37,30 @@ public class BattleTransitionController : MonoBehaviour
         {
             fadeCanvas.alpha = 0f;
         }
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mod)
+    {
+        StartCoroutine(AfterLoadFadeIn());
+    }
+
+    private IEnumerator AfterLoadFadeIn()
+    {
+        if (battleText != null)
+            battleText.gameObject.SetActive(false);
+
+        if (fadeCanvas != null)
+            yield return Fade(1f, 0f);
     }
 
     public void StartBattle(string battleSceneName)

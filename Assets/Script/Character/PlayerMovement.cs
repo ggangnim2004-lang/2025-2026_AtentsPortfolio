@@ -42,7 +42,7 @@ public class PlayerMovement : MonoBehaviour
 
         UpdateAnimation();
 
-        if (Input.anyKeyDown) Debug.Log("KeyDown detected");
+        // if (Input.anyKeyDown) Debug.Log("KeyDown detected");
     }
 
     private void FixedUpdate()
