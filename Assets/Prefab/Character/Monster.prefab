@@ -131,11 +131,10 @@ MonoBehaviour:
   player: {fileID: 0}
   playerTag: Player
   detectRadius: 6
-  stopDistance: 0.5
   moveSpeed: 1
   turnSpeed: 15
-  startChaseRadius: 3.2
-  stopChaseRadius: 2.7
+  startChaseRadius: 3
+  stopChaseRadius: 2.8
   drawGizmos: 1
 --- !u!114 &9186244521137893395
 MonoBehaviour:

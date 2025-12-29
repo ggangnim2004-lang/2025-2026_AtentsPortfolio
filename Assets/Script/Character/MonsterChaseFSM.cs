@@ -19,7 +19,7 @@ public class MonsterChaseFSM : MonoBehaviour
 
     [Header("Chase Setting")]
     public float detectRadius = 6.0f; // 추적 시작 반경
-    public float stopDistance = 1.2f; // 너무 붙으면 멈춤
+    // public float stopDistance = 1.2f; // 너무 붙으면 멈춤
     public float moveSpeed = 3.0f;
     public float turnSpeed = 10f;
 
@@ -97,12 +97,14 @@ public class MonsterChaseFSM : MonoBehaviour
         Vector3 toTarget = targetPos - myPos;
         float dist = toTarget.magnitude;
 
+        /*
         // 너무 가까우면 멈춤
         if (dist <= stopDistance)
         {
             StopMovement();
             return;
         }
+        */
 
         Vector3 dir = toTarget.normalized;
 

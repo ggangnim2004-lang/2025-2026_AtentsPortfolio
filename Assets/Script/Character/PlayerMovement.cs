@@ -41,6 +41,8 @@ public class PlayerMovement : MonoBehaviour
         JumpInput();
 
         UpdateAnimation();
+
+        if (Input.anyKeyDown) Debug.Log("KeyDown detected");
     }
 
     private void FixedUpdate()
