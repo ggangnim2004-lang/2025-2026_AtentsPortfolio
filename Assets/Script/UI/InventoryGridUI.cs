@@ -57,8 +57,12 @@ public class InventoryGridUI : MonoBehaviour
             (rectTransform, screenPos, uiCamera, out Vector2 local))
             return false;
 
-        float x = local.x;
-        float y = local.y;
+        // pivot/anchor와 무관하게 rectTransform 기준으로 0 ~ width, 0 ~ height 좌표로 변환
+        Rect r = rectTransform.rect;
+
+        // local은 pivot 기준 좌표라서 rect 범위로 재매핑
+        float x = local.x - r.xMin;         // 좌측이 0
+        float y = r.yMax - local.y;         // 상단이 0 (UI는 위가 +가 아니라서 이렇게 뒤집음)
 
         float stepX = cellSize.x + cellSpacing.x;
         float stepY = cellSize.y + cellSpacing.y;
@@ -66,14 +70,19 @@ public class InventoryGridUI : MonoBehaviour
         int gx = Mathf.FloorToInt(x / stepX);
         int gy = Mathf.FloorToInt(y / stepY);
 
-        float inCellX = x - gx * stepX;
-        float inCellY = y - gy * stepY;
+        if (gx < 0 || gx >= width || gy < 0 || gy >= height)
+            return false;
 
-        if (gx < 0 || gx >= width || gy < 0 || gy >= height) return false;
-        if (inCellX > cellSize.x || inCellY > cellSize.y) return false;
+        // 셀 내부인지(spacing 제외)
+        float inCellX = x - gx * stepX;
+        float incellY = y - gy * stepY;
+
+        if (inCellX > cellSize.x || incellY > cellSize.y)
+            return false;
 
         gridPos = new Vector2Int(gx, gy);
         return true;
+
     }
 
     public Vector2 GridToAnchoredPos(Vector2Int gridPos)
