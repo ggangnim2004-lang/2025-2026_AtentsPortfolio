@@ -52,6 +52,8 @@ public class InventoryLayoutController : MonoBehaviour
 
     public void Apply (GameViewMode mode)
     {
+        Debug.Log($"Apply Inventory Layout: {mode}, pos = {inventoryPanel.anchoredPosition}, anchorMin={inventoryPanel.anchorMin}");
+
         if (inventoryPanel == null) return;
 
         if (mode == GameViewMode.stage)
@@ -60,6 +62,12 @@ public class InventoryLayoutController : MonoBehaviour
             inventoryPanel.anchorMax = stageAnchorMax;
             inventoryPanel.pivot = stagePivot;
             inventoryPanel.anchoredPosition = stagePos;
+
+            inventoryPanel.localScale = Vector3.one;
+            inventoryPanel.localRotation = Quaternion.identity;
+
+            inventoryPanel.offsetMin = Vector2.zero;
+            inventoryPanel.offsetMax = Vector2.zero;
         }
         else
         {
@@ -67,6 +75,12 @@ public class InventoryLayoutController : MonoBehaviour
             inventoryPanel.anchorMax = battleAnchorMax;
             inventoryPanel.pivot = battlePivot;
             inventoryPanel.anchoredPosition = battlePos;
+
+            inventoryPanel.localScale = Vector3.one;
+            inventoryPanel.localRotation = Quaternion.identity;
+
+            inventoryPanel.offsetMin = Vector2.zero;
+            inventoryPanel.offsetMax = Vector2.zero;
         }
     }
 

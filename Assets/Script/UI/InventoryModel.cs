@@ -3,8 +3,8 @@ using UnityEngine;
 public class InventoryModel : MonoBehaviour
 {
     
-    public int width = 8;
-    public int height = 8;
+    public int width = 5;
+    public int height = 4;
 
     private InventoryItemUI[,] occupied;
 

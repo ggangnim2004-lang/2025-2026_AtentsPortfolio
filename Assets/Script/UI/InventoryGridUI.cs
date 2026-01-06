@@ -3,8 +3,10 @@ using UnityEngine.UI;
 
 public class InventoryGridUI : MonoBehaviour
 {
-    public int width = 8;
-    public int height = 8;
+    public int width = 5;
+    public int height = 4;
+
+    public InventoryModel model;
 
     public Vector2 cellSize = new Vector2(64, 64);
     public Vector2 cellSpacing = new Vector2(4, 4);
@@ -14,8 +16,13 @@ public class InventoryGridUI : MonoBehaviour
 
     private void Awake()
     {
+
+        width = model.width;
+        height = model.height;
+
         if (rectTransform == null) rectTransform = (RectTransform)transform;
         BuildGridVisual();
+
     }
 
     private void BuildGridVisual()

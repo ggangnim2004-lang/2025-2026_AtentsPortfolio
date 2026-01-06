@@ -500,8 +500,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 248813b8667ea8e48a4447872f0b0bbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 8
-  height: 8
+  width: 5
+  height: 4
 --- !u!1 &643627226
 GameObject:
   m_ObjectHideFlags: 0
@@ -731,6 +731,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 8
   height: 8
+  model: {fileID: 533159617}
   cellSize: {x: 64, y: 64}
   cellSpacing: {x: 4, y: 4}
   cellColor: {r: 1, g: 1, b: 1, a: 0.08}
