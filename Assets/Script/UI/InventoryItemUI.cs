@@ -25,6 +25,10 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     private Vector2Int originalAnchor;
     private bool dragging;
 
+    private Vector2 dragOffsetLocal; // 클릭 지점 오프셋
+    private Color baseColor; // 아이템 기본 색
+    private bool baseColorCached = false; 
+
     private void Awake()
     {
         rt = GetComponent<RectTransform>();
@@ -37,32 +41,62 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         {
             SnapToGrid(anchorGridPos);
             model.Place(this, anchorGridPos, shapeOffsets);
+
+            // 생성 직후 색을 기본 색으로 캐시 
+            if (!baseColorCached && image != null)
+            {
+                baseColor = image.color;
+                baseColorCached = true;
+            }
         }
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (gridUI == null || model == null || rootCanvas == null) return;
+        if (gridUI == null || model == null) return;
 
         dragging = true;
+
+        // 원위치 복구용 값 저장
         originalParent = rt.parent;
         originalAnchoredPos = rt.anchoredPosition;
         originalAnchor = anchorGridPos;
 
+        // 1) baseColor 저장
+        if (!baseColorCached)
+        {
+            baseColor = image != null ? image.color : Color.white;
+            baseColorCached = true;
+        }
+
+        // 2) 현재 위치 점유 해제
         model.Clear(this);
-        rt.SetParent(rootCanvas.transform, true);
+
+        // 3) 드래그 오프셋 계산
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            (RectTransform)rt.parent, eventData.position, eventData.pressEventCamera, out Vector2 mouseLocalInParent);
+
+        // anchoredPosition - 마우스 위치 = 오프셋
+        dragOffsetLocal = rt.anchoredPosition - mouseLocalInParent;
+
+        // 4) 드래그 중에는 최상단으로
+        rt.SetAsLastSibling();
     }
 
     public void OnDrag(PointerEventData eventData)
     {
         if (!dragging) return;
 
-        rt.position = eventData.position;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            (RectTransform)rt.parent, eventData.position, eventData.pressEventCamera, out Vector2 mouseLocalInParent);
 
+        rt.anchoredPosition = mouseLocalInParent + dragOffsetLocal;
+        
         if (gridUI.ScreenToGrid(eventData.position, eventData.pressEventCamera, out Vector2Int gridPos))
             SetPreviewColor(model.CanPlace(this, gridPos, shapeOffsets));
         else
             SetPreviewColor(false);
+        
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -92,7 +126,10 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             model.Place(this, anchorGridPos, shapeOffsets);
         }
 
-        SetPreviewColor(true);
+        if (image != null)
+        {
+            image.color = baseColor;
+        }
     }
 
     private void SnapToGrid(Vector2Int gridPos)
@@ -132,6 +169,6 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     private void SetPreviewColor(bool canPlace)
     {
         if (image == null) return;
-        image.color = canPlace ? Color.white : new Color(1f, 0.5f, 0.5f, 1f);
+        image.color = canPlace ? baseColor : new Color(1f, 0.5f, 0.5f, 1f);
     }
 }

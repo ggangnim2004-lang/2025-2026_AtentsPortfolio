@@ -3,8 +3,8 @@ using UnityEngine.UI;
 
 public class InventoryGridUI : MonoBehaviour
 {
-    public int width = 5;
-    public int height = 4;
+    public int width = 8;
+    public int height = 8;
 
     public InventoryModel model;
 

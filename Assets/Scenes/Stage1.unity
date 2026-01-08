@@ -254,6 +254,7 @@ MonoBehaviour:
   inventoryPanel: {fileID: 1694800283}
   toggleKey: 9
   forceOpenInBattle: 1
+  layout: {fileID: 0}
 --- !u!114 &161642063
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -500,7 +501,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 248813b8667ea8e48a4447872f0b0bbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 5
+  width: 6
   height: 4
 --- !u!1 &643627226
 GameObject:
@@ -712,11 +713,11 @@ RectTransform:
   m_Father: {fileID: 1694800283}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0, y: 1}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &818787625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -732,8 +733,8 @@ MonoBehaviour:
   width: 8
   height: 8
   model: {fileID: 533159617}
-  cellSize: {x: 64, y: 64}
-  cellSpacing: {x: 4, y: 4}
+  cellSize: {x: 96, y: 96}
+  cellSpacing: {x: 6, y: 6}
   cellColor: {r: 1, g: 1, b: 1, a: 0.08}
   rectTransform: {fileID: 818787624}
 --- !u!1 &963194225
@@ -1210,7 +1211,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 600, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1694800284
 MonoBehaviour:
