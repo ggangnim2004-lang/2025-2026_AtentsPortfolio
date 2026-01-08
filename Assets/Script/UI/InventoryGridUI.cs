@@ -102,4 +102,33 @@ public class InventoryGridUI : MonoBehaviour
     public Vector2 GetCellSize() => cellSize;
     public Vector2 GetCellSpacing() => cellSpacing;
 
+
+    public bool ScreenToGridLoose(Vector2 screenPos, Camera uiCamera, out Vector2Int gridPos)
+    {
+        gridPos = new Vector2Int(0, 0);
+        
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle
+            (rectTransform, screenPos, uiCamera, out Vector2 local))
+            return false;
+
+        Rect r = rectTransform.rect;
+
+        // pivot/anchor 무관한 좌표 변환
+        float x = local.x - r.xMin;     // 좌측이 0
+        float y = r.yMax - local.y;     // 상단이 0
+
+        float stepX = cellSize.x + cellSpacing.x;
+        float stepY = cellSize.y + cellSpacing.y;
+
+        int gx = Mathf.FloorToInt(x / stepX);
+        int gy = Mathf.FloorToInt(y / stepY);
+
+        // Grid 밖으로 나가도 가장 가까운 범위로 clamp
+        gx = Mathf.Clamp(gx, 0, width - 1);
+        gy = Mathf.Clamp(gy, 0, height - 1);
+
+        gridPos = new Vector2Int(gx, gy);
+        return true;
+    }
+
 }

@@ -104,14 +104,18 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (!dragging) return;
         dragging = false;
 
+        Vector2Int seedPos;
+        bool gotSeed = gridUI.ScreenToGridLoose(eventData.position, eventData.pressEventCamera, out seedPos);
+
         bool placed = false;
 
-        if (gridUI.ScreenToGrid(eventData.position, eventData.pressEventCamera, out Vector2Int gridPos))
+        if (gotSeed)
         {
-            if (model.CanPlace(this, gridPos, shapeOffsets))
+            // 반경 3 안에서 가장 가까운 유효 배치 찾기
+            if (TryFindNearestValid(seedPos, 3, out Vector2Int bestPos))
             {
                 rt.SetParent(originalParent, false);
-                anchorGridPos = gridPos;
+                anchorGridPos = bestPos;
                 SnapToGrid(anchorGridPos);
                 model.Place(this, anchorGridPos, shapeOffsets);
                 placed = true;
@@ -171,4 +175,76 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (image == null) return;
         image.color = canPlace ? baseColor : new Color(1f, 0.5f, 0.5f, 1f);
     }
+
+    private bool TryFindNearestValid(Vector2Int seed, int maxRadius, out Vector2Int bestPos)
+    {
+        bestPos = seed;
+        bool found = false;
+        int bestDistSq = int.MaxValue;
+
+        // 반경 0부터 점점 확장
+        for (int r = 0; r <= maxRadius; r++)
+        {
+            // r 테두리만
+            for (int dx = -r; dx <= r; dx++)
+            {
+                int dy1 = r;
+                int dy2 = -r;
+
+                // (dx, +r)
+                Vector2Int p1 = new Vector2Int(seed.x + dx, seed.y + dy1);
+                if (CheckCandidate(p1, seed, ref found, ref bestDistSq, ref bestPos)) { }
+
+                // (dx, -r) (r = 0이면 중복이라 건너뛴다)
+                if (r != 0)
+                {
+                    Vector2Int p2 = new Vector2Int(seed.x + dx, seed.y + dy2);
+                    if (CheckCandidate(p2, seed, ref found, ref bestDistSq, ref bestPos)) { }
+                }
+            }
+
+            for (int dy = - r + 1; dy <= r - 1; dy++)
+            {
+                int dx1 = r;
+                int dx2 = -r;
+
+                Vector2Int p1 = new Vector2Int(seed.x + dx1, seed.y + dy);
+                if (CheckCandidate(p1, seed, ref found, ref bestDistSq, ref bestPos)) { }
+
+                if (r != 0)
+                {
+                    Vector2Int p2 = new Vector2Int(seed.x + dx2, seed.y + dy);
+                    if (CheckCandidate(p2, seed, ref found, ref bestDistSq,ref bestPos)) { }
+                }
+            }
+
+            if (found) return true;
+        }
+
+        return false;
+    }
+
+    private bool CheckCandidate(Vector2Int candidate, Vector2Int seed, ref bool found, ref int bestDistSq, ref Vector2Int bestPos)
+    {
+        // grid 범위 체크
+        if (candidate.x < 0 || candidate.x >= gridUI.width || candidate.y < 0 || candidate.y >= gridUI.height)
+            return false;
+
+        // 배치 가능 체크
+        if (!model.CanPlace(this, candidate, shapeOffsets))
+            return false;
+
+        int dx = candidate.x - seed.x;
+        int dy = candidate.y - seed.y;
+        int distSq = dx * dx + dy * dy;
+
+        if (distSq < bestDistSq)
+        {
+            bestDistSq = distSq;
+            bestPos = candidate;
+            found = true;
+        }
+        return true;
+    }
+
 }
