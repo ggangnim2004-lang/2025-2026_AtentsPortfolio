@@ -61,7 +61,7 @@ public class InventoryTestItemSpawner : MonoBehaviour
             CreateOneTestItem(shape, cursor);
 
             cursor.x += spacingInGrid;
-            if (cursor.x >= gridUI.width)
+            if (cursor.x >= gridUI.Width)
             {
                 cursor.x = startGridPos.x;
                 cursor.y += spacingInGrid;

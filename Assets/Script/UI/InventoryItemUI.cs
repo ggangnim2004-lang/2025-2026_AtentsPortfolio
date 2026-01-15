@@ -5,11 +5,13 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    [Header("Refs")]
     public InventoryGridUI gridUI;
     public InventoryModel model;
     public Canvas rootCanvas;
     public Image image;
 
+    [Header("Shape (cells relative to anchor)")]
     public Vector2Int[] shapeOffsets = new Vector2Int[]
     {
         new Vector2Int(0,0),
@@ -17,17 +19,19 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         new Vector2Int(0,1),
     };
 
+    [Header("Current Anchor")]
     public Vector2Int anchorGridPos = new Vector2Int(0, 0);
 
     private RectTransform rt;
+
+    // 원복용
     private Transform originalParent;
     private Vector2 originalAnchoredPos;
     private Vector2Int originalAnchor;
-    private bool dragging;
 
-    private Vector2 dragOffsetLocal; // 클릭 지점 오프셋
-    private Color baseColor; // 아이템 기본 색
-    private bool baseColorCached = false; 
+    // 드래그 오프셋(마우스 찍은 지점 유지)
+    private Vector2 dragOffsetLocal;
+    private bool dragging;
 
     private void Awake()
     {
@@ -37,17 +41,16 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     private void Start()
     {
+        // 초기 배치
         if (gridUI != null && model != null)
         {
-            SnapToGrid(anchorGridPos);
-            model.Place(this, anchorGridPos, shapeOffsets);
+            // gridRoot 기준(0,1)로 맞춤
+            rt.SetParent(gridUI.gridRoot, false);
+            SetRectForGrid();
 
-            // 생성 직후 색을 기본 색으로 캐시 
-            if (!baseColorCached && image != null)
-            {
-                baseColor = image.color;
-                baseColorCached = true;
-            }
+            // 초기 위치 스냅 + 모델 배치
+            SnapToGrid(anchorGridPos);
+            model.TryPlace(this, anchorGridPos, shapeOffsets);
         }
     }
 
@@ -57,29 +60,21 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         dragging = true;
 
-        // 원위치 복구용 값 저장
+        // 원복 정보 저장
         originalParent = rt.parent;
         originalAnchoredPos = rt.anchoredPosition;
         originalAnchor = anchorGridPos;
 
-        // 1) baseColor 저장
-        if (!baseColorCached)
-        {
-            baseColor = image != null ? image.color : Color.white;
-            baseColorCached = true;
-        }
-
-        // 2) 현재 위치 점유 해제
+        // 드래그 시작 시 모델 점유 해제(이 아이템만)
         model.Clear(this);
 
-        // 3) 드래그 오프셋 계산
+        // 현재 부모 기준 로컬 마우스 위치 구해서 오프셋 계산
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             (RectTransform)rt.parent, eventData.position, eventData.pressEventCamera, out Vector2 mouseLocalInParent);
 
-        // anchoredPosition - 마우스 위치 = 오프셋
         dragOffsetLocal = rt.anchoredPosition - mouseLocalInParent;
 
-        // 4) 드래그 중에는 최상단으로
+        // 위로 올리기
         rt.SetAsLastSibling();
     }
 
@@ -91,12 +86,6 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             (RectTransform)rt.parent, eventData.position, eventData.pressEventCamera, out Vector2 mouseLocalInParent);
 
         rt.anchoredPosition = mouseLocalInParent + dragOffsetLocal;
-        
-        if (gridUI.ScreenToGrid(eventData.position, eventData.pressEventCamera, out Vector2Int gridPos))
-            SetPreviewColor(model.CanPlace(this, gridPos, shapeOffsets));
-        else
-            SetPreviewColor(false);
-        
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -104,45 +93,47 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (!dragging) return;
         dragging = false;
 
-        Vector2Int seedPos;
-        bool gotSeed = gridUI.ScreenToGridLoose(eventData.position, eventData.pressEventCamera, out seedPos);
-
         bool placed = false;
 
-        if (gotSeed)
+        // 드롭 위치를 grid 좌표로 변환
+        if (gridUI.ScreenToGrid(eventData.position, eventData.pressEventCamera, out Vector2Int dropGridPos))
         {
-            // 반경 3 안에서 가장 가까운 유효 배치 찾기
-            if (TryFindNearestValid(seedPos, 3, out Vector2Int bestPos))
+            // 배치 가능하면 스냅 + 모델 배치
+            if (model.TryPlace(this, dropGridPos, shapeOffsets))
             {
-                rt.SetParent(originalParent, false);
-                anchorGridPos = bestPos;
+                anchorGridPos = dropGridPos;
                 SnapToGrid(anchorGridPos);
-                model.Place(this, anchorGridPos, shapeOffsets);
                 placed = true;
             }
         }
 
+        // 실패하면 원위치 복구 + 모델도 원복 배치
         if (!placed)
         {
             rt.SetParent(originalParent, false);
             anchorGridPos = originalAnchor;
             rt.anchoredPosition = originalAnchoredPos;
-            model.Place(this, anchorGridPos, shapeOffsets);
-        }
 
-        if (image != null)
-        {
-            image.color = baseColor;
+            model.TryPlace(this, anchorGridPos, shapeOffsets);
         }
     }
 
-    private void SnapToGrid(Vector2Int gridPos)
+    private void SetRectForGrid()
     {
+        // gridRoot가 (0,1) pivot이라고 가정하므로 아이템도 동일하게 맞춤
         rt.anchorMin = new Vector2(0, 1);
         rt.anchorMax = new Vector2(0, 1);
         rt.pivot = new Vector2(0, 1);
 
+        // 아이템의 픽셀 크기 재계산
         rt.sizeDelta = CalcBoundingSizePixels();
+    }
+
+    private void SnapToGrid(Vector2Int gridPos)
+    {
+        // 혹시 누가 설정 바꿨을 수 있으니 매번 보정
+        SetRectForGrid();
+
         rt.anchoredPosition = gridUI.GridToAnchoredPos(gridPos);
     }
 
@@ -169,82 +160,4 @@ public class InventoryItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         float h = cellsH * cell.y + (cellsH - 1) * spacing.y;
         return new Vector2(w, h);
     }
-
-    private void SetPreviewColor(bool canPlace)
-    {
-        if (image == null) return;
-        image.color = canPlace ? baseColor : new Color(1f, 0.5f, 0.5f, 1f);
-    }
-
-    private bool TryFindNearestValid(Vector2Int seed, int maxRadius, out Vector2Int bestPos)
-    {
-        bestPos = seed;
-        bool found = false;
-        int bestDistSq = int.MaxValue;
-
-        // 반경 0부터 점점 확장
-        for (int r = 0; r <= maxRadius; r++)
-        {
-            // r 테두리만
-            for (int dx = -r; dx <= r; dx++)
-            {
-                int dy1 = r;
-                int dy2 = -r;
-
-                // (dx, +r)
-                Vector2Int p1 = new Vector2Int(seed.x + dx, seed.y + dy1);
-                if (CheckCandidate(p1, seed, ref found, ref bestDistSq, ref bestPos)) { }
-
-                // (dx, -r) (r = 0이면 중복이라 건너뛴다)
-                if (r != 0)
-                {
-                    Vector2Int p2 = new Vector2Int(seed.x + dx, seed.y + dy2);
-                    if (CheckCandidate(p2, seed, ref found, ref bestDistSq, ref bestPos)) { }
-                }
-            }
-
-            for (int dy = - r + 1; dy <= r - 1; dy++)
-            {
-                int dx1 = r;
-                int dx2 = -r;
-
-                Vector2Int p1 = new Vector2Int(seed.x + dx1, seed.y + dy);
-                if (CheckCandidate(p1, seed, ref found, ref bestDistSq, ref bestPos)) { }
-
-                if (r != 0)
-                {
-                    Vector2Int p2 = new Vector2Int(seed.x + dx2, seed.y + dy);
-                    if (CheckCandidate(p2, seed, ref found, ref bestDistSq,ref bestPos)) { }
-                }
-            }
-
-            if (found) return true;
-        }
-
-        return false;
-    }
-
-    private bool CheckCandidate(Vector2Int candidate, Vector2Int seed, ref bool found, ref int bestDistSq, ref Vector2Int bestPos)
-    {
-        // grid 범위 체크
-        if (candidate.x < 0 || candidate.x >= gridUI.width || candidate.y < 0 || candidate.y >= gridUI.height)
-            return false;
-
-        // 배치 가능 체크
-        if (!model.CanPlace(this, candidate, shapeOffsets))
-            return false;
-
-        int dx = candidate.x - seed.x;
-        int dy = candidate.y - seed.y;
-        int distSq = dx * dx + dy * dy;
-
-        if (distSq < bestDistSq)
-        {
-            bestDistSq = distSq;
-            bestPos = candidate;
-            found = true;
-        }
-        return true;
-    }
-
 }
